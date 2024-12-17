@@ -1,0 +1,142 @@
+/* Coin Description Styles */
+.coin-description {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .coin-description h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .show-more-link {
+    color: #1e90ff;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .show-more-link:hover {
+    text-decoration: underline;
+  }
+  
+  .coin-description p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+  }
+  
+  .toggle-description {
+    margin-top: 10px;
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .toggle-description:hover {
+    background-color: #187bcd;
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #666;
+    margin-top: 50px;
+  }
+
+  
+.coin-details-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  .coin-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .coin-image {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+  }
+  
+  .coin-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .coin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  
+  .stat-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-item h3 {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .stat-item p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1e90ff;
+  }
+  
+  .positive-change {
+    color: #28a745; /* Green for positive change */
+  }
+  
+  .negative-change {
+    color: #dc3545; /* Red for negative change */
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #666;
+    margin-top: 50px;
+  }
+  
+  .home-button-container {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .home-button-container .btn {
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    text-transform: uppercase;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .home-button-container .btn:hover {
+    background-color: #0056b3;
+    text-decoration: none;
+  }
+  
