@@ -11,8 +11,9 @@ const CryptoHomePage = () => {
   const [filteredCoins, setFilteredCoins] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
- const searchTimeout = useRef(null);
- const searchController = useRef(null);
+
+  const searchTimeout = useRef(null);
+  const searchController = useRef(null);
 
   const fetchCoins = async (signal) => {
     try {
@@ -48,13 +49,9 @@ const CryptoHomePage = () => {
           'Too many requests. Please wait a moment and try again.'
         );
       } else if (error.response?.status === 401) {
-        setError(
-          'Invalid or missing CoinGecko API key.'
-        );
+        setError('Invalid or missing CoinGecko API key.');
       } else if (error.response?.status === 403) {
-        setError(
-          'CoinGecko has blocked this request.'
-        );
+        setError('CoinGecko has blocked this request.');
       } else {
         setError(
           'Failed to load cryptocurrencies. Please try again.'
@@ -72,95 +69,94 @@ const CryptoHomePage = () => {
 
     return () => {
       controller.abort();
+
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+
+      if (searchController.current) {
+        searchController.current.abort();
+      }
     };
   }, []);
 
-
-
   const handleSearchChange = (e) => {
-  const query = e.target.value.trim().toLowerCase();
+    const query = e.target.value.trim().toLowerCase();
 
-  setSearchQuery(query);
+    setSearchQuery(query);
 
-  // Previous timer cancel
-  if (searchTimeout.current) {
-    clearTimeout(searchTimeout.current);
-  }
-
-  // Previous API request cancel
-  if (searchController.current) {
-    searchController.current.abort();
-    searchController.current = null;
-  }
-
-  // Empty search
-  if (!query) {
-    setFilteredCoins(coins);
-    return;
-  }
-
-  // Search in already loaded coins first
-  const localResults = coins.filter((coin) => {
-    return (
-      coin.name.toLowerCase().includes(query) ||
-      coin.symbol.toLowerCase().includes(query) ||
-      coin.id.toLowerCase().includes(query)
-    );
-  });
-
-  setFilteredCoins(localResults);
-
-  // Local result मिला तो API call की जरूरत नहीं
-  if (localResults.length > 0) {
-    return;
-  }
-
-  // Wait 300ms before API search
-  searchTimeout.current = setTimeout(async () => {
-    try {
-      // New controller
-      const controller = new AbortController();
-      searchController.current = controller;
-
-      const response = await axios.get(
-        'https://api.coingecko.com/api/v3/search',
-        {
-          params: {
-            query: query,
-            x_cg_demo_api_key: API_KEY,
-          },
-          signal: controller.signal,
-        }
-      );
-
-      const results = response.data.coins || [];
-
-      setFilteredCoins(
-        results.map((coin) => ({
-          id: coin.id,
-          name: coin.name,
-          symbol: coin.symbol,
-          image: coin.thumb,
-          current_price: null,
-        }))
-      );
-
-    } catch (error) {
-
-      // Cancelled request ko ignore karo
-      if (error.code === 'ERR_CANCELED') {
-        return;
-      }
-
-      console.error('Search error:', error);
-
-      setFilteredCoins([]);
+    // Previous timer cancel
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
     }
-  }, 300);
-};
 
+    // Previous API request cancel
+    if (searchController.current) {
+      searchController.current.abort();
+      searchController.current = null;
+    }
 
+    // Empty search
+    if (!query) {
+      setFilteredCoins(coins);
+      return;
+    }
 
+    // Search inside already loaded coins first
+    const localResults = coins.filter((coin) => {
+      return (
+        coin.name.toLowerCase().includes(query) ||
+        coin.symbol.toLowerCase().includes(query) ||
+        coin.id.toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredCoins(localResults);
+
+    // If found locally, don't call API
+    if (localResults.length > 0) {
+      return;
+    }
+
+    // API search after 300ms
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const controller = new AbortController();
+
+        searchController.current = controller;
+
+        const response = await axios.get(
+          'https://api.coingecko.com/api/v3/search',
+          {
+            params: {
+              query: query,
+              x_cg_demo_api_key: API_KEY,
+            },
+            signal: controller.signal,
+          }
+        );
+
+        const results = response.data.coins || [];
+
+        setFilteredCoins(
+          results.map((coin) => ({
+            id: coin.id,
+            name: coin.name,
+            symbol: coin.symbol,
+            image: coin.thumb,
+            current_price: null,
+          }))
+        );
+      } catch (error) {
+        if (error.code === 'ERR_CANCELED') {
+          return;
+        }
+
+        console.error('Search error:', error);
+        setFilteredCoins([]);
+      }
+    }, 300);
+  };
 
   const handleRetry = () => {
     const controller = new AbortController();
@@ -260,6 +256,7 @@ const CryptoHomePage = () => {
                   />
 
                   <div className="card-body">
+
                     <h3 className="coin-name">
                       {coin.name}
                     </h3>
@@ -269,6 +266,7 @@ const CryptoHomePage = () => {
                         ? `Price: ₹${coin.current_price.toLocaleString('en-IN')}`
                         : coin.symbol?.toUpperCase()}
                     </p>
+
                   </div>
 
                 </div>

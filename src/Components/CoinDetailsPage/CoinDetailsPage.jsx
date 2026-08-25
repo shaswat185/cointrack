@@ -29,14 +29,14 @@ const CoinDetailsPage = () => {
       setLoading(true);
       setError(null);
 
-     const response = await axios.get(
-  `https://api.coingecko.com/api/v3/coins/${coinId}`,
-  {
-    params: {
-      x_cg_demo_api_key: API_KEY,
-    },
-  }
-);
+      const response = await axios.get(
+        `https://api.coingecko.com/api/v3/coins/${coinId}`,
+        {
+          params: {
+            x_cg_demo_api_key: API_KEY,
+          },
+        }
+      );
 
       setCoinDetails(response.data);
     } catch (error) {
@@ -72,39 +72,39 @@ const CoinDetailsPage = () => {
   }
 
   // Error state
- if (error) {
-  return (
-    <div className="details-error-page">
-      <div className="details-error-card">
+  if (error) {
+    return (
+      <div className="details-error-page">
+        <div className="details-error-card">
 
-        <div className="details-error-icon">
-          !
+          <div className="details-error-icon">
+            !
+          </div>
+
+          <h2>Unable to load cryptocurrency</h2>
+
+          <p>{error}</p>
+
+          <div className="details-error-actions">
+            <button
+              className="details-retry-button"
+              onClick={fetchCoinDetails}
+            >
+              Try Again
+            </button>
+
+            <Link
+              to="/"
+              className="details-home-button"
+            >
+              Back to Home
+            </Link>
+          </div>
+
         </div>
-
-        <h2>Unable to load cryptocurrency</h2>
-
-        <p>{error}</p>
-
-        <div className="details-error-actions">
-          <button
-            className="details-retry-button"
-            onClick={fetchCoinDetails}
-          >
-            Try Again
-          </button>
-
-          <Link
-            to="/"
-            className="details-home-button"
-          >
-            Back to Home
-          </Link>
-        </div>
-
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   // No data state
   if (!coinDetails) {
@@ -127,13 +127,13 @@ const CoinDetailsPage = () => {
 
       {/* Coin Header */}
       <div className="coin-header">
+
         <img
           src={coinDetails.image?.large}
           alt={coinDetails.name}
           className="details-coin-image"
         />
-
-        <h1 className="coin-name">
+        <h1 className="details-coin-name">
           {coinDetails.name}
         </h1>
 
@@ -163,8 +163,8 @@ const CoinDetailsPage = () => {
           <p>
             {coinDetails.market_data?.circulating_supply != null
               ? coinDetails.market_data.circulating_supply.toLocaleString(
-                  'en-IN'
-                )
+                'en-IN'
+              )
               : '—'}
           </p>
         </div>
@@ -189,8 +189,8 @@ const CoinDetailsPage = () => {
               priceChange > 0
                 ? 'positive-change'
                 : priceChange < 0
-                ? 'negative-change'
-                : 'neutral-change'
+                  ? 'negative-change'
+                  : 'neutral-change'
             }
           >
             {priceChange != null
