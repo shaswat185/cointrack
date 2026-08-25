@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './style.css';
 
+const API_KEY = import.meta.env.VITE_COINGECKO_API_KEY;
+
 const CryptoHomePage = () => {
   const [coins, setCoins] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -10,92 +12,102 @@ const CryptoHomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-const fetchCoins = async (signal) => {
-  try {
-    setLoading(true);
-    setError(null);
+  const fetchCoins = async (signal) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const response = await axios.get(
-      'https://api.coingecko.com/api/v3/coins/markets',
-      {
-        params: {
-          vs_currency: 'inr',
-          order: 'market_cap_desc',
-          per_page: 100,
-          page: 1,
-          sparkline: false,
-        },
-        signal,
+      const response = await axios.get(
+        'https://api.coingecko.com/api/v3/coins/markets',
+        {
+          params: {
+            vs_currency: 'inr',
+            order: 'market_cap_desc',
+            per_page: 100,
+            page: 1,
+            sparkline: false,
+            x_cg_demo_api_key: API_KEY,
+          },
+          signal,
+        }
+      );
+
+      setCoins(response.data);
+      setFilteredCoins(response.data);
+    } catch (error) {
+      if (error.code === 'ERR_CANCELED') {
+        return;
       }
-    );
 
-    setCoins(response.data);
-    setFilteredCoins(response.data);
-  } catch (error) {
-    // Request cancel hui hai to error message mat dikhao
-    if (error.code === 'ERR_CANCELED') {
-      return;
-    }
+      console.error('CoinGecko API Error:', error);
 
-    if (error.response?.status === 429) {
-      setError(
-        'Too many requests. Please wait a moment and try again.'
-      );
-    } else {
-      setError(
-        'Failed to load cryptocurrencies. Please try again.'
-      );
+      if (error.response?.status === 429) {
+        setError(
+          'Too many requests. Please wait a moment and try again.'
+        );
+      } else if (error.response?.status === 401) {
+        setError(
+          'Invalid or missing CoinGecko API key.'
+        );
+      } else if (error.response?.status === 403) {
+        setError(
+          'CoinGecko has blocked this request.'
+        );
+      } else {
+        setError(
+          'Failed to load cryptocurrencies. Please try again.'
+        );
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
-  const controller = new AbortController();
+    const controller = new AbortController();
 
-  fetchCoins(controller.signal);
+    fetchCoins(controller.signal);
 
-  return () => {
-    controller.abort();
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+
+    setSearchQuery(query);
+
+    const filtered = coins.filter((coin) => {
+      return (
+        coin.name.toLowerCase().includes(query) ||
+        coin.symbol.toLowerCase().includes(query) ||
+        coin.id.toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredCoins(filtered);
   };
-}, []);
 
- const handleSearchChange = (e) => {
-  const query = e.target.value.toLowerCase();
+  const handleRetry = () => {
+    const controller = new AbortController();
 
-  setSearchQuery(query);
-
-  const filtered = coins.filter((coin) => {
-    return (
-      coin.name.toLowerCase().includes(query) ||
-      coin.symbol.toLowerCase().includes(query) ||
-      coin.id.toLowerCase().includes(query)
-    );
-  });
-
-  setFilteredCoins(filtered);
-};
+    fetchCoins(controller.signal);
+  };
 
   return (
     <div className="crypto-homepage">
+
+      {/* Hero Section */}
       <div className="hero-section">
-        <h1 className="crypto-title">Crypto Tracker</h1>
-        <p className="crypto-subtitle">Your gateway to tracking cryptocurrencies in real-time.</p>
 
-       
+        <h1 className="crypto-title">
+          Crypto Tracker
+        </h1>
 
-        {error && (
-          <div className="error-container">
-            <p>{error}</p>
-
-            <button onClick={fetchCoins}>
-              Try Again
-            </button>
-          </div>
-        )}
-
-        
+        <p className="crypto-subtitle">
+          Track cryptocurrency prices and market data.
+        </p>
 
         <div className="search-container">
           <input
@@ -106,30 +118,109 @@ const fetchCoins = async (signal) => {
             className="form-control search-input"
           />
         </div>
+
       </div>
 
+      {/* Main Content */}
       {loading ? (
-        <div className="loading">Loading coins...</div>
-      ) : (
-        
-        <div className="coin-list">
-          {filteredCoins.length > 0 ? (
-            filteredCoins.map((coin) => (
-              <Link to={`/coin/${coin.id}`} key={coin.id} className="coin-card">
-                <div className="coin-card-content">
-                  <img src={coin.image} alt={coin.name} className="home-coin-image" />
-                  <div className="card-body">
-                    <h3 className="coin-name">{coin.name}</h3>
-                    <p className="coin-price">Price: ₹{coin.current_price}</p>
-                  </div>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <p className="no-results">No results found</p>
-          )}
+
+        <div className="coin-list-state">
+
+          <div className="loading-spinner"></div>
+
+          <h3>
+            Loading cryptocurrencies...
+          </h3>
+
+          <p>
+            Please wait while we fetch the latest
+            market data.
+          </p>
+
         </div>
+
+      ) : error ? (
+
+        <div className="coin-list-state error-state">
+
+          <div className="error-icon">
+            !
+          </div>
+
+          <h3>
+            Unable to load cryptocurrencies
+          </h3>
+
+          <p>
+            {error}
+          </p>
+
+          <button
+            className="retry-button"
+            onClick={handleRetry}
+          >
+            Try Again
+          </button>
+
+        </div>
+
+      ) : (
+
+        <div className="coin-list">
+
+          {filteredCoins.length > 0 ? (
+
+            filteredCoins.map((coin) => (
+
+              <Link
+                to={`/coin/${coin.id}`}
+                key={coin.id}
+                className="coin-card"
+              >
+
+                <div className="coin-card-content">
+
+                  <img
+                    src={coin.image}
+                    alt={coin.name}
+                    className="home-coin-image"
+                  />
+
+                  <div className="card-body">
+
+                    <h3 className="coin-name">
+                      {coin.name}
+                    </h3>
+
+                    <p className="coin-price">
+                      Price:{' '}
+                      {coin.current_price != null
+                        ? `₹${coin.current_price.toLocaleString(
+                            'en-IN'
+                          )}`
+                        : '—'}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </Link>
+
+            ))
+
+          ) : (
+
+            <p className="no-results">
+              No cryptocurrencies found.
+            </p>
+
+          )}
+
+        </div>
+
       )}
+
     </div>
   );
 };
