@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './style.css';
@@ -11,6 +11,7 @@ const CryptoHomePage = () => {
   const [filteredCoins, setFilteredCoins] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+ const searchTimeout = useRef(null);
 
   const fetchCoins = async (signal) => {
     try {
@@ -24,7 +25,7 @@ const CryptoHomePage = () => {
             vs_currency: 'inr',
             order: 'market_cap_desc',
             per_page: 100,
-            page: 1,
+            page: 4,
             sparkline: false,
             x_cg_demo_api_key: API_KEY,
           },
@@ -73,21 +74,70 @@ const CryptoHomePage = () => {
     };
   }, []);
 
-  const handleSearchChange = (e) => {
-    const query = e.target.value.toLowerCase();
+ const handleSearchChange = (e) => {
+  const query = e.target.value.trim().toLowerCase();
 
-    setSearchQuery(query);
+  setSearchQuery(query);
 
-    const filtered = coins.filter((coin) => {
-      return (
-        coin.name.toLowerCase().includes(query) ||
-        coin.symbol.toLowerCase().includes(query) ||
-        coin.id.toLowerCase().includes(query)
+  // Previous timer cancel
+  if (searchTimeout.current) {
+    clearTimeout(searchTimeout.current);
+  }
+
+  // Empty search
+  if (!query) {
+    setFilteredCoins(coins);
+    return;
+  }
+
+  // First search locally - instant
+  const localResults = coins.filter((coin) => {
+    return (
+      coin.name.toLowerCase().includes(query) ||
+      coin.symbol.toLowerCase().includes(query) ||
+      coin.id.toLowerCase().includes(query)
+    );
+  });
+
+  setFilteredCoins(localResults);
+
+  // If local results found, don't call API
+  if (localResults.length > 0) {
+    return;
+  }
+
+  // API search after 300ms
+  searchTimeout.current = setTimeout(async () => {
+    try {
+      const response = await axios.get(
+        'https://api.coingecko.com/api/v3/search',
+        {
+          params: {
+            query: query,
+            x_cg_demo_api_key: API_KEY,
+          },
+        }
       );
-    });
 
-    setFilteredCoins(filtered);
-  };
+      const results = response.data.coins || [];
+
+      setFilteredCoins(
+        results.map((coin) => ({
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol,
+          image: coin.thumb,
+          current_price: null,
+        }))
+      );
+    } catch (error) {
+      console.error('Search error:', error);
+
+      setFilteredCoins([]);
+    }
+  }, 300);
+};
+
 
   const handleRetry = () => {
     const controller = new AbortController();
@@ -181,26 +231,21 @@ const CryptoHomePage = () => {
                 <div className="coin-card-content">
 
                   <img
-                    src={coin.image}
+                    src={coin.image || coin.thumb}
                     alt={coin.name}
                     className="home-coin-image"
                   />
 
                   <div className="card-body">
-
                     <h3 className="coin-name">
                       {coin.name}
                     </h3>
 
                     <p className="coin-price">
-                      Price:{' '}
                       {coin.current_price != null
-                        ? `₹${coin.current_price.toLocaleString(
-                            'en-IN'
-                          )}`
-                        : '—'}
+                        ? `Price: ₹${coin.current_price.toLocaleString('en-IN')}`
+                        : coin.symbol?.toUpperCase()}
                     </p>
-
                   </div>
 
                 </div>

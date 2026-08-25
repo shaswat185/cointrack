@@ -140,3 +140,75 @@
     text-decoration: none;
   }
   
+  .details-error-page {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.details-error-card {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  background: #fff;
+  padding: 45px 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.details-error-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  border: 3px solid #dc3545;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #dc3545;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.details-error-card h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.details-error-card p {
+  margin-bottom: 25px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.details-error-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.details-retry-button,
+.details-home-button {
+  padding: 11px 22px;
+  border-radius: 7px;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.details-retry-button {
+  border: none;
+  background: #1e90ff;
+  color: #fff;
+}
+
+.details-home-button {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #333;
+}

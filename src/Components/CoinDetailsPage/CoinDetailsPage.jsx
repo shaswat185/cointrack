@@ -66,23 +66,39 @@ const CoinDetailsPage = () => {
   }
 
   // Error state
-  if (error) {
-    return (
-      <div className="details-error">
+ if (error) {
+  return (
+    <div className="details-error-page">
+      <div className="details-error-card">
+
+        <div className="details-error-icon">
+          !
+        </div>
+
+        <h2>Unable to load cryptocurrency</h2>
+
         <p>{error}</p>
 
-        <button onClick={fetchCoinDetails}>
-          Try Again
-        </button>
+        <div className="details-error-actions">
+          <button
+            className="details-retry-button"
+            onClick={fetchCoinDetails}
+          >
+            Try Again
+          </button>
 
-        <br />
+          <Link
+            to="/"
+            className="details-home-button"
+          >
+            Back to Home
+          </Link>
+        </div>
 
-        <Link to="/" className="btn btn-primary">
-          Back to Home
-        </Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   // No data state
   if (!coinDetails) {
