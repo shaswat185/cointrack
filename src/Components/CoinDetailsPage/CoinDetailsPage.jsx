@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import ShowMoreText from 'react-show-more-text';
 import './style.css';
+const API_KEY = import.meta.env.VITE_COINGECKO_API_KEY;
 
 const formatINR = (value) => {
   if (value == null) {
@@ -28,9 +29,14 @@ const CoinDetailsPage = () => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get(
-        `https://api.coingecko.com/api/v3/coins/${coinId}`
-      );
+     const response = await axios.get(
+  `https://api.coingecko.com/api/v3/coins/${coinId}`,
+  {
+    params: {
+      x_cg_demo_api_key: API_KEY,
+    },
+  }
+);
 
       setCoinDetails(response.data);
     } catch (error) {
@@ -124,7 +130,7 @@ const CoinDetailsPage = () => {
         <img
           src={coinDetails.image?.large}
           alt={coinDetails.name}
-          className="home-coin-image"
+          className="details-coin-image"
         />
 
         <h1 className="coin-name">

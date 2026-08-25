@@ -12,6 +12,7 @@ const CryptoHomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
  const searchTimeout = useRef(null);
+ const searchController = useRef(null);
 
   const fetchCoins = async (signal) => {
     try {
@@ -25,7 +26,7 @@ const CryptoHomePage = () => {
             vs_currency: 'inr',
             order: 'market_cap_desc',
             per_page: 100,
-            page: 4,
+            page: 1,
             sparkline: false,
             x_cg_demo_api_key: API_KEY,
           },
@@ -74,7 +75,9 @@ const CryptoHomePage = () => {
     };
   }, []);
 
- const handleSearchChange = (e) => {
+
+
+  const handleSearchChange = (e) => {
   const query = e.target.value.trim().toLowerCase();
 
   setSearchQuery(query);
@@ -84,13 +87,19 @@ const CryptoHomePage = () => {
     clearTimeout(searchTimeout.current);
   }
 
+  // Previous API request cancel
+  if (searchController.current) {
+    searchController.current.abort();
+    searchController.current = null;
+  }
+
   // Empty search
   if (!query) {
     setFilteredCoins(coins);
     return;
   }
 
-  // First search locally - instant
+  // Search in already loaded coins first
   const localResults = coins.filter((coin) => {
     return (
       coin.name.toLowerCase().includes(query) ||
@@ -101,14 +110,18 @@ const CryptoHomePage = () => {
 
   setFilteredCoins(localResults);
 
-  // If local results found, don't call API
+  // Local result मिला तो API call की जरूरत नहीं
   if (localResults.length > 0) {
     return;
   }
 
-  // API search after 300ms
+  // Wait 300ms before API search
   searchTimeout.current = setTimeout(async () => {
     try {
+      // New controller
+      const controller = new AbortController();
+      searchController.current = controller;
+
       const response = await axios.get(
         'https://api.coingecko.com/api/v3/search',
         {
@@ -116,6 +129,7 @@ const CryptoHomePage = () => {
             query: query,
             x_cg_demo_api_key: API_KEY,
           },
+          signal: controller.signal,
         }
       );
 
@@ -130,13 +144,22 @@ const CryptoHomePage = () => {
           current_price: null,
         }))
       );
+
     } catch (error) {
+
+      // Cancelled request ko ignore karo
+      if (error.code === 'ERR_CANCELED') {
+        return;
+      }
+
       console.error('Search error:', error);
 
       setFilteredCoins([]);
     }
   }, 300);
 };
+
+
 
 
   const handleRetry = () => {
