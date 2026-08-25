@@ -8,6 +8,7 @@ const CryptoHomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCoins, setFilteredCoins] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError]= useState(null);
 
   const fetchCoins = async () => {
     setLoading(true);
@@ -22,7 +23,9 @@ const CryptoHomePage = () => {
       setCoins(response.data);
       setFilteredCoins(response.data);
     } catch (error) {
-      console.error('Error fetching coins:', error);
+      setError('Failed to load cryptocurrencies. Please try again.');
+      setCoins([]);
+      setFilteredCoins([])
     }
     setLoading(false);
   };
@@ -46,6 +49,13 @@ const CryptoHomePage = () => {
       <div className="hero-section">
         <h1 className="crypto-title">Crypto Tracker</h1>
         <p className="crypto-subtitle">Your gateway to tracking cryptocurrencies in real-time.</p>
+        
+         {error && (
+          <div className="alert alert-danger" style={{ marginTop: '20px', marginBottom: '20px' }}>
+            {error}
+          </div>
+        )}
+        
         <div className="search-container">
           <input
             type="text"
